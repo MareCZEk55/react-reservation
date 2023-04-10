@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model roles {
+  id    Int     @id @default(autoincrement()) @db.UnsignedInt
+  nazev String  @unique(map: "nazev") @db.VarChar(100)
+  users users[]
+}
+
+model users {
+  id           Int     @id @default(autoincrement()) @db.UnsignedInt
+  username     String  @unique(map: "username") @db.VarChar(100)
+  password     String  @db.VarChar(100)
+  role_id      Int     @default(2) @db.UnsignedInt
+  refreshToken String? @db.Text
+  roles        roles   @relation(fields: [role_id], references: [id], onUpdate: Restrict, map: "users_ibfk_1")
+
+  @@index([role_id], map: "role_id")
+}
+
+model mistnosti {
+  id       Int        @id @default(autoincrement())
+  nazev    String     @unique(map: "nazev") @db.VarChar(250)
+  poznamka String     @db.VarChar(250)
+  barva    String     @db.VarChar(15)
+  udalosti udalosti[]
+}
+
+model udalosti {
+  id            Int       @id @default(autoincrement()) @db.UnsignedInt
+  nazev         String    @db.VarChar(150)
+  datum_zacatek DateTime  @db.DateTime(0)
+  datum_konec   DateTime  @db.DateTime(0)
+  popis         String    @default("") @db.VarChar(250)
+  id_mistnost   Int
+  opakovane     Boolean   @default(false)
+  mistnosti     mistnosti @relation(fields: [id_mistnost], references: [id], onUpdate: Restrict, map: "fk_mistnost")
+
+  @@index([id_mistnost], map: "fk_mistnost")
+}
