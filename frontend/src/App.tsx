@@ -19,11 +19,15 @@ import TabPanel from "../components/TabPanel";
 import { IEvents2, IRooms2 } from "./interfaces/IDataEvents";
 import axios from "axios";
 import Agenda from "../components/Agenda/Agenda";
+import { UserContext } from "./UserContext";
+import { IUser, Roles } from "./interfaces/IUser";
+import Uzivatele from "../components/Uzivatele/Uzivatele";
 
 function App() {
   const [mode, setMode] = React.useState<"light" | "dark">("light");
   const [events, setEvents] = React.useState<IEvents2[]>([]);
   const [rooms, setRooms] = React.useState<IRooms2[]>([]);
+  const [user, setUser] = React.useState<IUser>();
   const [lodaingData, setLodaingData] = React.useState<boolean>(true);
   const colorMode = React.useMemo(
     () => ({
@@ -92,7 +96,16 @@ function App() {
 
   useEffect(() => {
     getData();
+    if(localStorage.getItem("colorModeApp") !== null){
+      console.log("getlocal")
+      const userMode:"light" | "dark" = localStorage.getItem("colorModeApp") === "light" ? "light" : "dark";
+      setMode(userMode);
+    }
   }, []);
+
+  useEffect(()=>{
+    localStorage.setItem("colorModeApp", mode)
+  },[mode])
 
   useEffect(() => {}, [lodaingData]);
 
@@ -121,8 +134,20 @@ function App() {
     );
   }
 
+  function handleSetUser(user:IUser|null){
+    if(user == null){
+      setUser(undefined)
+      if(valueTabChange === 4){
+        setValueTabChange(0);
+      }
+    }else{
+      setUser(user);
+    }
+  }
+
   return (
     <ColorModeContext.Provider value={colorMode}>
+      <UserContext.Provider value={{user, handleSetUser}}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <div className="App">
@@ -138,6 +163,7 @@ function App() {
               <Tab label="Kalendář 2" />
               <Tab label="Agenda" />
               <Tab label="Místnosti" />
+              {user?.roleName === Roles.Admin && <Tab label="Uživatelé" />}
             </Tabs>
           </Box>
           <TabPanel value={valueTabChange} index={0}>
@@ -156,8 +182,12 @@ function App() {
           <TabPanel value={valueTabChange} index={3}>
             <Mistnosti rooms={rooms} setRooms={handleSetRooms}/>
           </TabPanel>
+          <TabPanel value={valueTabChange} index={4}>
+            <Uzivatele/>
+          </TabPanel>
         </div>
       </ThemeProvider>
+      </UserContext.Provider>
     </ColorModeContext.Provider>
   );
 }
