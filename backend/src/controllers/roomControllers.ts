@@ -19,6 +19,12 @@ export async function getMistnosti(req:Request, res:Response): Promise<void>{
     }
 }
 
+/**
+ * Prida mistnost do DB.
+ * Potrebuje v body: nazev, poznamka, barva
+ * @param req 
+ * @param res 
+ */
 export async function addRoom(req: Request, res: Response): Promise<void> {
     try{
         const {nazev, poznamka, barva} = req.body;
