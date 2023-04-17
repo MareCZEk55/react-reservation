@@ -4,6 +4,11 @@ import { mistnosti } from "@prisma/client"
 
 const roomsClient = prisma.mistnosti;
 
+/**
+ * Vytahne vsechny mistnosti z DB. Vraci vesechny sloupce
+ * @param req 
+ * @param res 
+ */
 export async function getMistnosti(req:Request, res:Response): Promise<void>{
     try{
         const allUdalosti: mistnosti[] = await roomsClient.findMany();
