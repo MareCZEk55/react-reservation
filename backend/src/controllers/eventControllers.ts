@@ -8,6 +8,11 @@ function getDatumDB(datum:any):Date{
     return new Date(new Date(datum).getTime() - new Date(datum).getTimezoneOffset()*60*1000)
 }
 
+/**
+ * Vrátí všechny eventy z DB. Vrací všechny sloupce.
+ * @param req 
+ * @param res 
+ */
 export async function getEvents(req:Request, res:Response): Promise<void>{
     try{
         const allUdalosti: udalosti[] = await eventClient.findMany();
