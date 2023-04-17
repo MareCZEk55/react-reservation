@@ -11,6 +11,9 @@ type userRoles = Prisma.usersGetPayload<{
     select: { username:true, password:true, roles: {select: {nazev:true}} }
 }>
 
+/**
+ * Metoda pro prihlaseni uzivatele
+ */
 export async function login(req:Request, res:Response) {
     const username:string = req.body.username;
     const pass:string = req.body.password;
