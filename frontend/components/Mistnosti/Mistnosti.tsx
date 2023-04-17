@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { IRooms2 } from '../../src/interfaces/IDataEvents'
 import { Button, Dialog, Grid, IconButton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import { DataGrid, GridCallbackDetails, GridCellEditStopParams, GridCellEditStopReasons, GridCellParams, GridColDef, GridRenderCellParams, GridTreeNode, MuiBaseEvent, MuiEvent, csCZ } from '@mui/x-data-grid';
@@ -6,6 +6,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 import { SketchPicker } from 'react-color';
 import axios from 'axios';
 import AddDialog from "./AddDialog"
+import { UserContext } from '../../src/UserContext';
+import { Roles } from '../../src/interfaces/IUser';
 
 interface IMistnostiParams{
     rooms: IRooms2[],
@@ -17,8 +19,12 @@ function Mistnosti( {rooms, setRooms} :IMistnostiParams) {
     const [editedRow, setEditedRow] = useState<GridCellParams<any, unknown, unknown, GridTreeNode>["row"]>();
     const [editedColorCell, setEditedColorCell] = useState({});
     const [openAddMistnost, setOpenAddMistnost] = useState<boolean>(false)
-
+    const {user} = useContext(UserContext)
+    
     function showColorPicker(defaultColor:string, row:any){
+        if(user?.roleName !== Roles.Admin){
+            return;
+        }
         setSelectColor(defaultColor);
         setDisplayColorPicker(prev=> !prev)
         setEditedColorCell(row);
@@ -41,10 +47,10 @@ function Mistnosti( {rooms, setRooms} :IMistnostiParams) {
             field: "room_id", headerName: "ID"
         },
         {
-            field: "text", headerName: "Název", editable:true
+            field: "text", headerName: "Název", editable: user?.roleName === Roles.Admin
         },
         {
-            field: "subtext", headerName: "Popis", editable:true, width: 150
+            field: "subtext", headerName: "Popis", editable: user?.roleName === Roles.Admin
         },
         {
             field: "color", headerName: "Barva", editable:true,
@@ -65,7 +71,6 @@ function handleCellEditStop(param: GridCellEditStopParams, event:any) {
 }
 
 async function updateMistnost() {
-    console.log(editedRow)
     try{
     const editedRoom = await axios.put(`${import.meta.env.VITE_URL_BACKEND}/rooms/uprav-mistnost/${editedRow.room_id}`,
             {
